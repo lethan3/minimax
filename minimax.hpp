@@ -5,7 +5,7 @@
 
 class Base_Value {
   public:
-	Value();
+	Base_Value();
 	bool operator<=>(const Base_Value& v) const;
 };
 
@@ -22,31 +22,28 @@ class Base_Move {
 	Base_Move();
 };
 
-template<class Value, class HValue, class Move>
+template<class Value, class HValue, class Move> requires (
+	std::derived_from<Value, Base_Value>,
+	std::derived_from<HValue, Base_HValue>,
+	std::derived_from<Move, Base_Move>
+)
 class Base_State {
   public:
-	State();
+	Base_State();
 	bool turn; // player to move
 	bool is_terminal() const;
 	Value get_terminal_value() const;
 	HValue get_heuristic_value() const;
-	std::vector<State> adj(); // return all states reachable in one turn
-	bool operator<=>(const State& s) const; // comparator for maps
+	std::vector<Base_State> adj(); // return all states reachable in one turn
+	bool operator<=>(const Base_State& s) const; // comparator for maps
 };
 
-template<typename State>
-concept StateConcept = requires(State s) {
-    { s.is_terminal() } -> std::convertible_to<bool>;
-    { s.get_terminal_value() } -> std::convertible_to<Value>;
-    { s.get_heuristic_value() } -> std::convertible_to<HValue>;
-    { s.adj() } -> std::convertible_to<std::vector<State>>;
-    { s.operator<(std::declval<State>()) } -> std::convertible_to<bool>;
-    { s.operator==(std::declval<State>()) } -> std::convertible_to<bool>;
-};
-
-template <class Value, class HValue, class State, class Move>
+template<template<class, class, class> class StateT, class Value, class HValue, class Move> requires (
+	std::derived_from<StateT<Value, HValue, Move>, Base_State<Value, HValue, Move>>
+)
 class Minimax {
   public:
+	typedef StateT<Value, HValue, Move> State;
 	std::map<State, Value> state_values;
 	std::map<State, State> best_move;
 	std::map<State, bool> processed;
