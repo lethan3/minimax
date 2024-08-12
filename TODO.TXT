@@ -1,0 +1,2 @@
+- enable players to play against CPU
+- implement undo

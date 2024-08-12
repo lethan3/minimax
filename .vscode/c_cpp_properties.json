@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include/**",
+                "/media/lethan3/EthData/Documents/Competitive Programming/ac-library/",
+                "${workspaceFolder}"
+            ],
+            "defines": [],
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "compilerPath": "/usr/bin/g++",
+            "compilerArgs": [
+                "-std=c++17 -O2"
+            ]
+        }
+    ],
+    "version": 4
+}
