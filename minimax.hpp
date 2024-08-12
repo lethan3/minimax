@@ -1,12 +1,13 @@
 #include <iostream>
+#include <concepts>
 #include <vector>
 #include <map>
 
-class Value;
-static const Value VALUE_MIN, VALUE_MAX;
-bool Value::operator<(const Value& v) const;
-bool Value::operator==(const Value& v) const;
-bool Value::operator<=(const Value& v) const { return *this < v || *this == v; }
+class Value {
+  public:
+	Value();
+	bool operator<=>(const Value& v) const;
+};
 
 class HValue { // heuristic value
   public:
@@ -28,6 +29,17 @@ class State {
 	bool operator==(const State& s) const;
 };
 
+template<typename State>
+concept StateConcept = requires(State s) {
+    { s.is_terminal() } -> std::convertible_to<bool>;
+    { s.get_terminal_value() } -> std::convertible_to<Value>;
+    { s.get_heuristic_value() } -> std::convertible_to<HValue>;
+    { s.adj() } -> std::convertible_to<std::vector<State>>;
+    { s.operator<(std::declval<State>()) } -> std::convertible_to<bool>;
+    { s.operator==(std::declval<State>()) } -> std::convertible_to<bool>;
+};
+
+template <class Value, class HValue, class State, class Move>
 class Minimax {
   public:
 	std::map<State, Value> state_values;
