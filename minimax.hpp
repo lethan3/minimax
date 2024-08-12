@@ -3,21 +3,27 @@
 #include <vector>
 #include <map>
 
-class Value {
+class Base_Value {
   public:
 	Value();
-	bool operator<=>(const Value& v) const;
+	bool operator<=>(const Base_Value& v) const;
 };
 
-class HValue { // heuristic value
+class Base_HValue { // heuristic value
   public:
-	HValue();
-	bool operator<(const HValue& v) const;
-	bool operator==(const HValue& v) const;
-	bool operator<=(const HValue& v) const { return *this < v || *this == v; }
+	Base_HValue();
+	bool operator<(const Base_HValue& v) const;
+	bool operator==(const Base_HValue& v) const;
+	bool operator<=(const Base_HValue& v) const { return *this < v || *this == v; }
 };
 
-class State {
+class Base_Move {
+  public:
+	Base_Move();
+};
+
+template<class Value, class HValue, class Move>
+class Base_State {
   public:
 	State();
 	bool turn; // player to move
@@ -25,8 +31,7 @@ class State {
 	Value get_terminal_value() const;
 	HValue get_heuristic_value() const;
 	std::vector<State> adj(); // return all states reachable in one turn
-	bool operator<(const State& s) const; // comparator for maps
-	bool operator==(const State& s) const;
+	bool operator<=>(const State& s) const; // comparator for maps
 };
 
 template<typename State>
