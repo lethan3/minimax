@@ -7,7 +7,7 @@
 #include "Value_int.hpp"
 #include "HValue_int.hpp"
 
-int n = 4, m = 4, w = 3;
+int n, m, w;
 
 class Move : public BaseMove<Move> {
   public:
@@ -20,6 +20,10 @@ class Move : public BaseMove<Move> {
 		this->col = col;
 	}
 
+	bool operator==(const Move& m) const {
+		return this->row == m.row && this->col == m.col;
+	}
+
 	static Move parse_move(std::string s);
 	std::string to_string() const {
 		return (char)('A' + col) + std::to_string(row + 1);
@@ -28,8 +32,15 @@ class Move : public BaseMove<Move> {
 
 Move Move::parse_move(std::string s) { // throws error if syntax of move is wrong
 	for (int i = 0; i < (int)s.size(); ++i) {
-		if (i == 0) assert('A' <= s[i] && s[i] <= 'Z' || 'a' <= s[i] && s[i] <= 'z');
-		else assert('0' <= s[i] && s[i] <= '9');
+		if (i == 0) {
+			if (!('A' <= s[i] && s[i] <= 'Z' || 'a' <= s[i] && s[i] <= 'z')) {
+				throw std::runtime_error("First character should be a letter");
+			}
+		} else {
+			if (!('0' <= s[i] && s[i] <= '9')) {
+				throw std::runtime_error("Non-first characters should be digits");
+			}
+		}
 	}
 	return Move(stoi(s.substr(1)) - 1, 'A' <= s[0] && s[0] <= 'Z' ? s[0] - 'A' : s[0] - 'a');
 }
