@@ -7,7 +7,7 @@
 #include "Value_int.hpp"
 #include "HValue_int.hpp"
 
-int n = 3, m = 3, w = 3;
+int n = 4, m = 4, w = 3;
 
 class Move : public BaseMove<Move> {
   public:

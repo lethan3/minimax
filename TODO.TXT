@@ -1,3 +1,4 @@
+- sort by heuristic
 - enable players to play against CPU
 - implement undo
-- endless loops -> draw
+- endless loops -> draw: check if current state already on the stack
