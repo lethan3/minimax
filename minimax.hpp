@@ -74,7 +74,11 @@ class Minimax {
 		} else if (state.player_to_move) {
 			Value value = Value::VALUE_MIN;
 			bool pruned = false;
-			for (std::pair<Move, State>& p : state.adj()) {
+
+			std::vector<std::pair<Move, State>> nes = state.adj();
+			std::sort(nes.begin(), nes.end(), [&](std::pair<Move, State> a, std::pair<Move, State> b) {return a.second.get_heuristic_value() > b.second.get_heuristic_value(); });
+
+			for (std::pair<Move, State>& p : nes) {
 				State ne = p.second;
 			
 				Value cval = minimax(ne, alpha, beta);
@@ -95,7 +99,11 @@ class Minimax {
 		} else {
 			Value value = Value::VALUE_MAX;
 			bool pruned = false;
-			for (std::pair<Move, State>& p : state.adj()) {
+
+			std::vector<std::pair<Move, State>> nes = state.adj();
+			std::sort(nes.begin(), nes.end(), [&](std::pair<Move, State> a, std::pair<Move, State> b) {return a.second.get_heuristic_value() < b.second.get_heuristic_value(); });
+
+			for (std::pair<Move, State>& p : nes) {
 				State ne = p.second;
 
 				Value cval = minimax(ne, alpha, beta);
