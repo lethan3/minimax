@@ -112,7 +112,7 @@ class State : public BaseState<State, Value, HValue, Move> {
 		return HValue(0);
 	}
 
-	std::vector<std::string> display() const {
+	std::string to_string() const {
 		std::vector<std::vector<char>> v(4 * n - 1, std::vector<char>(4 * m - 1));
 		for (int i = 0; i < (int)v.size(); ++i) {
 			for (int j = 0; j < (int)v[0].size(); ++j) {
@@ -134,10 +134,9 @@ class State : public BaseState<State, Value, HValue, Move> {
 			}
 		}
 
-		std::vector<std::string> r(v.size());
-
+		std::string r = "";
 		for (int i = 0; i < (int)v.size(); ++i) {
-			r[i] = std::string(v[i].begin(), v[i].end());
+			r += std::string(v[i].begin(), v[i].end()) + "\n";
 		}
 		
 		return r;
@@ -161,5 +160,9 @@ class State : public BaseState<State, Value, HValue, Move> {
 	std::strong_ordering operator<=>(const State& s) const {
 		return std::pair<std::vector<std::vector<int>>, bool>{this->grid, this->player_to_move} 
 			<=> std::pair<std::vector<std::vector<int>>, bool>{s.grid, s.player_to_move};
+	}
+
+	bool operator==(const State& s) const {
+		return this->player_to_move == s.player_to_move && this->grid == s.grid;
 	}
 };

@@ -1,4 +1,14 @@
 - sort by heuristic
+- all optimal moves
+- all winning moves
 - enable players to play against CPU
 - implement undo
-- endless loops -> draw: check if current state already on the stack
+- multiple moves by player in a row analyzed correctly (implemented, check accuracy)
+- endless loops -> draw: check if current state already on the stack (implemented, check accuracy)
+- template Value, HValue for stuff other than int?
+- allow display without evaluation
+
+
+done:
+
+- alpha-beta bug: B1 A1 C1 A3 A2 optmove (B2)

@@ -39,9 +39,10 @@ class BaseState {
 	bool player_to_move; // 1 if this is the maximizing player
 	std::pair<bool, Value> get_terminal() const;
 	HValue get_heuristic_value() const;
-	std::vector<std::string> display() const;
+	std::string to_string() const;
 	std::vector<std::pair<Move, State>> adj() const; // return all {move, state} pairs reachable in one turn
 	std::strong_ordering operator<=>(const State& s) const; // comparator for maps
+	bool operator==(const State& s) const;
 };
 
 template<template<class, class, class> class StateT, class Value, class HValue, class Move> requires (
@@ -55,7 +56,7 @@ class Minimax {
 	std::map<State, bool> processed;
 	std::set<State> cstack;
 
-	Value minimax(State state, Value alpha, Value beta) {
+	Value minimax(const State& state, Value alpha, Value beta) {
 		if (processed[state]) {
 			return state_values[state];
 		}
@@ -63,7 +64,6 @@ class Minimax {
 
 		if (cstack.count(state)) {
 			// infinite loop, hopefully logic actually works
-			cstack.erase(state);
 			return Value::VALUE_DRAW;
 		}
 		cstack.insert(state);
@@ -73,7 +73,8 @@ class Minimax {
 			state_values[state] = p_terminal.second;
 		} else if (state.player_to_move) {
 			Value value = Value::VALUE_MIN;
-			for (std::pair<Move, State> p : state.adj()) {
+			bool pruned = false;
+			for (std::pair<Move, State>& p : state.adj()) {
 				State ne = p.second;
 			
 				Value cval = minimax(ne, alpha, beta);
@@ -85,6 +86,7 @@ class Minimax {
 				if (value >= beta) {
 					// don't process remaining branches
 					processed[state] = false;
+					pruned = true;
 					break;
 				}
 				alpha = std::max(alpha, value);
@@ -92,9 +94,10 @@ class Minimax {
 			state_values[state] = value;
 		} else {
 			Value value = Value::VALUE_MAX;
-			for (std::pair<Move, State> p : state.adj()) {
+			bool pruned = false;
+			for (std::pair<Move, State>& p : state.adj()) {
 				State ne = p.second;
-				
+
 				Value cval = minimax(ne, alpha, beta);
 				if (cval < value) {
 					value = cval;
@@ -104,6 +107,7 @@ class Minimax {
 				if (value <= alpha) {
 					// don't process remaining branches
 					processed[state] = false;
+					pruned = true;
 					break;
 				}
 				beta = std::min(beta, value);
@@ -125,9 +129,7 @@ class Minimax {
 			process(state);
 		}
 
-		for (std::string& s : state.display()) {
-			std::cout << s << "\n";
-		}
+		std::cout << state.to_string();
 
 		std::cout << "Value: " << state_values[state].to_string() << "\n";
 	}
@@ -147,6 +149,7 @@ class Minimax {
 			std::cout << "\n";
 			
 			if (cmd == "optmove" || cmd == "move") {
+				// command creates a move
 				if (state_v[curr_ind].get_terminal().first) {
 					std::cout << "Current state is terminal\n";
 					continue;
@@ -155,6 +158,7 @@ class Minimax {
 				State next_state;
 
 				if (cmd == "optmove") {
+					processed[state_v[curr_ind]] = false;
 					process(state_v[curr_ind]);
 					std::tie(move, next_state) = best_move[state_v[curr_ind]];
 				} else if (cmd == "move") {
@@ -200,10 +204,51 @@ class Minimax {
 				}
 
 				curr_ind = inp_ind;
+			} else if (cmd == "list_optmoves") {
+				std::cout << "Optimal moves:\n";
+				process(state_v[curr_ind]);
+				for (std::pair<Move, State>& p : state_v[curr_ind].adj()) {
+					process(p.second);
+					if (state_values[p.second] <= state_values[state_v[curr_ind]] 
+						&& state_values[p.second] >= state_values[state_v[curr_ind]]) {
+						std::cout << "* " << p.first.to_string() << "\n";
+					}
+				}
+			} else if (cmd == "list_winmoves") {
+				std::cout << "Winning moves:\n";
+				process(state_v[curr_ind]);
+				for (std::pair<Move, State>& p : state_v[curr_ind].adj()) {
+					process(p.second);
+					if (state_values[p.second] > Value::VALUE_DRAW && state_v[curr_ind].player_to_move ||
+						state_values[p.second] < Value::VALUE_DRAW && !state_v[curr_ind].player_to_move) {
+						std::cout << "* " << p.first.to_string() << "\n";
+					}
+				}
+			} else if (cmd == "list_drawmoves") {
+				std::cout << "Drawing moves:\n";
+				process(state_v[curr_ind]);
+				for (std::pair<Move, State>& p : state_v[curr_ind].adj()) {
+					process(p.second);
+					if (state_values[p.second] <= Value::VALUE_DRAW
+						&& state_values[p.second] >= Value::VALUE_DRAW) {
+						std::cout << "* " << p.first.to_string() << "\n";
+					}
+				}
+			} else if (cmd == "list_losemoves") {
+				std::cout << "Losing moves:\n";
+				process(state_v[curr_ind]);
+				for (std::pair<Move, State>& p : state_v[curr_ind].adj()) {
+					process(p.second);
+					if (state_values[p.second] > Value::VALUE_DRAW && !state_v[curr_ind].player_to_move ||
+						state_values[p.second] < Value::VALUE_DRAW && state_v[curr_ind].player_to_move) {
+						std::cout << "* " << p.first.to_string() << "\n";
+					}
+				}
 			} else {
 				std::cout << "\"" << cmd << "\" is not a command\n";
-				continue;
 			}
+
+			std::cout << "\n";
 		}
 	}
 };
